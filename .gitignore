@@ -1,0 +1,16 @@
+# 모델 가중치 (용량 큼 — ultralytics 자동 다운로드)
+*.pt
+*.onnx
+*.weights
+
+# PDF
+*.pdf
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+
+# 통계 CSV (로컬 실행 결과)
+stats_*.csv
