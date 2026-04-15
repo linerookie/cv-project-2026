@@ -1,4 +1,4 @@
-# Computer Vision Projects 2025
+# Computer Vision Projects 2026
 > CVPR / ICCV / ECCV / ICLR 탑티어 학회 논문 기반 실시간 OpenCV 프로젝트
 
 ## 프로젝트 목록
