@@ -14,3 +14,17 @@ __pycache__/
 
 # 통계 CSV (로컬 실행 결과)
 stats_*.csv
+
+# 가상환경
+nerf_env/
+
+# nerfstudio 학습 출력 (용량 큼)
+nerf_pipeline/data/objects/*/outputs/
+nerf_pipeline/data/objects/*/database.db
+nerf_pipeline/data/objects/*/images_masked/
+
+# 개인 문서
+*.docx
+
+# Claude 설정
+.claude/
