@@ -8,20 +8,24 @@ rembg (U2Net 기반) 로 객체 전경 분리 → RGBA PNG 저장
 """
 
 import argparse
+import os
 from pathlib import Path
 
 import cv2
 import numpy as np
-from rembg import remove
+from rembg import remove, new_session
 from PIL import Image
 import io
+
+# onnxruntime GPU 로드 실패 경고 억제 (CPU fallback 사용)
+os.environ.setdefault("ONNXRUNTIME_PROVIDERS", "CPUExecutionProvider")
 
 
 def process_image(img_path: Path, out_dir: Path, preview: bool = False) -> Path:
     with open(img_path, "rb") as f:
         input_bytes = f.read()
 
-    output_bytes = remove(input_bytes)
+    output_bytes = remove(input_bytes, session=new_session("u2net", providers=["CPUExecutionProvider"]))
     rgba = Image.open(io.BytesIO(output_bytes)).convert("RGBA")
 
     out_path = out_dir / (img_path.stem + ".png")

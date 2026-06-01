@@ -20,7 +20,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).parent
 
-
 def step(name: str, cmd: list, skip: bool = False):
     if skip:
         print(f"\n[건너뜀] {name}")
@@ -55,7 +54,7 @@ def main():
 
     # 1. COLMAP
     colmap_cmd = [py, str(ROOT / "02_preprocess" / "run_colmap.py"),
-                  "--obj_dir", str(obj)]
+                  "--obj_dir", str(obj), "--gpu"]
     if args.camera_params:
         colmap_cmd += ["--camera_params", str(args.camera_params)]
     step("COLMAP SfM", colmap_cmd, skip=args.skip_colmap)

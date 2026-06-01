@@ -43,7 +43,7 @@ def build_camera_model_arg(params_path: Path) -> list:
     ]
 
 
-def run_colmap_pipeline(obj_dir: Path, camera_params: Path = None, use_gpu: bool = False):
+def run_colmap_pipeline(obj_dir: Path, camera_params: Path = None, use_gpu: bool = True):
     images_dir = obj_dir / "images"
     db_path = obj_dir / "database.db"
     sparse_dir = obj_dir / "sparse"
@@ -63,7 +63,7 @@ def run_colmap_pipeline(obj_dir: Path, camera_params: Path = None, use_gpu: bool
         ["colmap", "feature_extractor",
          "--database_path", str(db_path),
          "--image_path", str(images_dir),
-         "--SiftExtraction.use_gpu", gpu_flag,
+         "--FeatureExtraction.use_gpu", gpu_flag,
          "--SiftExtraction.max_image_size", "3200",
          ] + camera_args,
         "Feature extraction (SIFT)"
@@ -73,7 +73,7 @@ def run_colmap_pipeline(obj_dir: Path, camera_params: Path = None, use_gpu: bool
     run(
         ["colmap", "exhaustive_matcher",
          "--database_path", str(db_path),
-         "--SiftMatching.use_gpu", gpu_flag,
+         "--FeatureMatching.use_gpu", gpu_flag,
          ],
         "Feature matching (Exhaustive)"
     )

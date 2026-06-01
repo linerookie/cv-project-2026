@@ -22,6 +22,9 @@ nerf_env/
 nerf_pipeline/data/objects/*/outputs/
 nerf_pipeline/data/objects/*/database.db
 nerf_pipeline/data/objects/*/images_masked/
+nerf_pipeline/data/objects/*/sparse/
+nerf_pipeline/data/objects/*/ns_data_masked/
+nerf_pipeline/data/objects/*/train_log.json
 
 # 개인 문서
 *.docx

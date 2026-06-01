@@ -69,21 +69,22 @@ def get_model_size_mb(ckpt_dir: Path) -> float:
     return total / 1024 / 1024
 
 
+def find_latest_config(exp_dir: Path):
+    """nerfstudio 중첩 출력 구조에서 최신 config.yml 탐색"""
+    configs = sorted(exp_dir.rglob("config.yml"))
+    return configs[-1] if configs else None
+
+
 def ns_render(exp_dir: Path, out_dir: Path):
     """nerfstudio로 test set 렌더링"""
-    ckpt_dir = exp_dir / "nerfstudio_models"
-    if not ckpt_dir.exists():
+    config = find_latest_config(exp_dir)
+    if config is None:
         return False
-
-    ckpts = sorted(ckpt_dir.glob("step-*.ckpt"))
-    if not ckpts:
-        return False
-    latest = ckpts[-1]
 
     out_dir.mkdir(parents=True, exist_ok=True)
     cmd = [
         "ns-render", "dataset",
-        "--load-checkpoint", str(latest),
+        "--load-config", str(config),
         "--rendered-output-names", "rgb",
         "--output-path", str(out_dir),
         "--split", "test",
@@ -99,15 +100,18 @@ def evaluate_one(exp_dir: Path, test_images_dir: Path, loss_fn) -> dict:
 
     if do_render:
         print(f"  렌더링 중: {exp_name}")
-        ok = ns_render(exp_dir, render_dir)
-        if not ok:
-            render_dir = exp_dir / "eval_images"
+        ns_render(exp_dir, render_dir)
+
+    # ns-render는 {out_dir}/test/rgb/ 에 저장
+    render_rgb_dir = render_dir / "test" / "rgb"
+    pred_dir = render_rgb_dir if render_rgb_dir.exists() else render_dir
 
     gt_imgs = load_images_from_dir(test_images_dir)
-    pred_imgs = load_images_from_dir(render_dir)
+    pred_imgs = load_images_from_dir(pred_dir)
 
     if not gt_imgs or not pred_imgs:
         print(f"  [경고] {exp_name}: GT={len(gt_imgs)}, Pred={len(pred_imgs)} — 건너뜀")
+        print(f"  pred_dir: {pred_dir}")
         return None
 
     n = min(len(gt_imgs), len(pred_imgs))
@@ -129,7 +133,8 @@ def evaluate_one(exp_dir: Path, test_images_dir: Path, loss_fn) -> dict:
         pred_t = img_to_tensor(pred_rgb)
         lpips_list.append(compute_lpips_score(gt_t, pred_t, loss_fn))
 
-    ckpt_dir = exp_dir / "nerfstudio_models"
+    latest_config = find_latest_config(exp_dir)
+    ckpt_dir = latest_config.parent / "nerfstudio_models" if latest_config else exp_dir
     model_mb = get_model_size_mb(ckpt_dir) if ckpt_dir.exists() else 0.0
 
     train_log = exp_dir / ".." / ".." / "train_log.json"
@@ -140,7 +145,7 @@ def evaluate_one(exp_dir: Path, test_images_dir: Path, loss_fn) -> dict:
             if log.get("exp_name", "") in str(exp_dir):
                 train_sec = log.get("train_time_sec", 0.0)
 
-    fps = measure_fps(render_dir)
+    fps = measure_fps(pred_dir)
 
     return {
         "exp_name": exp_name,
